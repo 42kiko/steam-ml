@@ -98,6 +98,10 @@ check:
 	@echo "Running all pre-commit checks..."
 	$(PRECOMMIT) run --all-files
 
+test:
+	@echo "Running base tests..."
+	$(PYTHON) -m pytest tests
+
 # ------------------------------------------------------------
 # Data ingestion
 # ------------------------------------------------------------
