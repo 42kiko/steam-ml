@@ -6,8 +6,8 @@ import httpx
 import pandas as pd
 from tenacity import retry, stop_after_attempt, wait_exponential
 
-from src.utils.io import write_json
-from src.utils.logging import get_logger
+from utils.io import write_json
+from utils.logging import get_logger
 
 
 class BaseIngestor(ABC):
@@ -34,7 +34,11 @@ class BaseIngestor(ABC):
         self.timeout = timeout
 
         self.logger = get_logger(f"ingestor.{source_name}")
-        self.client = httpx.Client(timeout=self.timeout)
+        self.client = httpx.Client(
+            timeout=self.timeout,
+            http2=False,
+            headers={"User-Agent": "steam-ml/0.1 (+https://github.com/42kiko)"},
+        )
 
         self.logger.info("Initialized ingestor")
 
