@@ -205,3 +205,6 @@ cython_debug/
 marimo/_static/
 marimo/_lsp/
 __marimo__/
+
+# Local Steam Web API config override (per-developer, not committed)
+config/sources/steam_web_api.local.yaml

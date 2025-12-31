@@ -5,6 +5,7 @@ from typing import Any
 import pandas as pd
 
 from ingestion.base import BaseIngestor
+from src.utils.config import load_yaml
 
 
 class SteamWebIngestor(BaseIngestor):
@@ -33,16 +34,51 @@ class SteamWebIngestor(BaseIngestor):
     def _get_api_key(self) -> str:
         """Return the Steam Web API key or raise a helpful error.
 
-        The key must be provided via the `STEAM_API_KEY` environment variable.
+        Resolution order:
+        1. `STEAM_API_KEY` environment variable.
+        2. Local override: `config/sources/steam_web_api.local.yaml`.
+        3. Repo config: `auth.api_key` (or `steam.api_key` / top-level `api_key`) in
+           `config/sources/steam_web_api.yaml`.
         """
 
+        # 1) Environment variable takes precedence so it can be safely used in CI/
+        #    production without touching config files.
         api_key = os.getenv("STEAM_API_KEY")
-        if not api_key:
-            raise RuntimeError(
-                "STEAM_API_KEY environment variable is not set. "
-                "Create a Steam Web API key and export it as STEAM_API_KEY before running ingestion."
+        if api_key:
+            return api_key
+
+        # 2) Local override file (git-ignored), so each developer can keep their own key.
+        local_path = Path("config/sources/steam_web_api.local.yaml")
+        if local_path.exists():
+            data = load_yaml(local_path)
+            yaml_key = (
+                data.get("auth", {}).get("api_key")
+                or data.get("steam", {}).get("api_key")
+                or data.get("api_key")
             )
-        return api_key
+            if yaml_key:
+                return str(yaml_key)
+
+        # 3) Fallback: repo YAML config next to the other source configs.
+        config_path = Path("config/sources/steam_web_api.yaml")
+        if config_path.exists():
+            data = load_yaml(config_path)
+
+            # Support a few reasonable shapes, e.g.:
+            # auth.api_key, steam.api_key, or just api_key at the top level.
+            yaml_key = (
+                data.get("auth", {}).get("api_key")
+                or data.get("steam", {}).get("api_key")
+                or data.get("api_key")
+            )
+            if yaml_key:
+                return str(yaml_key)
+
+        raise RuntimeError(
+            "Steam Web API key is not configured. "
+            "Set STEAM_API_KEY or define auth.api_key in "
+            "config/sources/steam_web_api.local.yaml or steam_web_api.yaml."
+        )
 
     def ingest_app_list(self, include_dlc: bool = True, page_size: int = 50_000) -> None:
         """Ingest the complete Steam app list.
