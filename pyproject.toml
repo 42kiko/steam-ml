@@ -36,7 +36,7 @@ select = [
 ]
 
 ignore = [
-    "E501",  # line-length (Black regelt das)
+    "E501",  # line-length (enforced by Black)
 ]
 
 fix = true
