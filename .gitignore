@@ -206,5 +206,6 @@ marimo/_static/
 marimo/_lsp/
 __marimo__/
 
-# Local Steam Web API config override (per-developer, not committed)
+# Steam Web API configs (do not commit real keys)
+config/sources/steam_web_api.yaml
 config/sources/steam_web_api.local.yaml
