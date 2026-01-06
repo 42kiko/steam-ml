@@ -41,7 +41,7 @@ steam-ml/
 │  │  ├─ base.py                      # BaseIngestor with HTTP client, retries, persistence
 │  │  ├─ steam_web.py                 # Steam Web API ingestor (app list)
 │  │  ├─ steam_store.py               # Steam Store API ingestor (app details, incremental)
-│  │  ├─ steam_spy.py                 # Placeholder for future SteamSpy ingestor
+│  │  ├─ steam_spy.py                 # SteamSpy API ingestor (global stats, owners, etc.)
 │  │  └─ __init__.py
 │  └─ utils/
 │     ├─ config.py                    # YAML config loader
