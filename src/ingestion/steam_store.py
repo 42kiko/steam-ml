@@ -42,18 +42,30 @@ class SteamStoreIngestor(BaseIngestor):
 
         Uses the (unofficial) Steam Store API endpoint:
         https://store.steampowered.com/api/appdetails?appids=<appid>&cc=<cc>&l=<language>
+
+        Any network / HTTP error after retries will be logged and the app will be
+        skipped so that a single failure does not abort the whole ingest run.
         """
 
         self.logger.info("Fetching store details for appid=%s", appid)
 
-        payload = self._get(
-            "/appdetails",
-            params={
-                "appids": appid,
-                "cc": cc,
-                "l": language,
-            },
-        )
+        try:
+            payload = self._get(
+                "/appdetails",
+                params={
+                    "appids": appid,
+                    "cc": cc,
+                    "l": language,
+                },
+            )
+        except Exception as exc:  # noqa: BLE001 - log and skip single-app failures
+            self.logger.error(
+                "Failed to fetch store details for appid=%s: %s: %s",
+                appid,
+                type(exc).__name__,
+                exc,
+            )
+            return None
 
         data = payload.get(str(appid))
         if not data or not data.get("success"):
